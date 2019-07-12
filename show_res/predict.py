@@ -66,6 +66,8 @@ def _main_(args):
                 image_ini = image[..., 2]
                 image_ini = np.uint8(np.float64((image_ini + 1000) / 1800) * 255)
 
+            image = image[:, :, ::-1]
+
             (imagename, extension) = os.path.splitext(image_path.split('/')[-1])
 
             # predict the bounding boxes
@@ -85,17 +87,15 @@ def _main_(args):
                 f.write(newline)
 
 
-
-
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Predict with a trained yolo model')
     argparser.add_argument('-c', '--conf', default='config_neu.json',
                            help='path to configuration file')
-    argparser.add_argument('-i', '--input', default='E:/XYM/my_training/Class5_valid/',
+    argparser.add_argument('-i', '--input', default='E:/Training/chestCT/test_input/',
                            help='path to an image, a directory of images, a video, or webcam')
-    argparser.add_argument('-o', '--output', default='E:/XYM/my_training/Class5_output/',
+    argparser.add_argument('-o', '--output', default='E:/Training/chestCT/test_output/',
                            help='path to output directory')
-    argparser.add_argument('-p', '--predict', default='E:/XYM/my_training/Class5_output/',
+    argparser.add_argument('-p', '--predict', default='E:/Training/chestCT/test_output/',
                            help='path to predict directory')
     argparser.add_argument('-s', '--show', default=False,
                            help='whether to show the result')

@@ -169,6 +169,8 @@ class BatchGenerator(Sequence):
         image_name = image_name.replace('.raw', '.mhd')
         image = raw_reader(image_name, instance['img_num'])
 
+        image = image[:, :, ::-1]
+
         if image.shape[0] != 512:
             return None, None
 

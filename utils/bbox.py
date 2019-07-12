@@ -62,6 +62,7 @@ def bbox_iou(box1, box2):
     except ZeroDivisionError:
         return 0
 
+
 def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
     for box in boxes:
         label_str = ''
