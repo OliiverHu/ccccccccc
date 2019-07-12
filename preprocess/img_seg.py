@@ -32,7 +32,7 @@ def largest_connect_area(binary_img):
 
     max_label = 0
     max_num = 0
-    for i in range(1, num):  # 这里�?开始，防止将背景设置为最大连通域
+    for i in range(1, num):
         if np.sum(labeled_img == i) > max_num:
             max_num = np.sum(labeled_img == i)
             max_label = i
@@ -128,6 +128,7 @@ def image_segmentor(mhdfile_path):
     # mhd_path = path_to_file
     filename = tool_packages.get_filename(mhdfile_path)
     img_set, origin, spacing = tool_packages.raw_image_reader(mhdfile_path)
+
     slice_num, width, height = img_set.shape
     rt = []
     # print(slice_num)
@@ -159,18 +160,22 @@ def image_segmentor(mhdfile_path):
         plt visualization below
         
         """
-        plt.figure()
-        plt.subplot(2, 2, 1), plt.imshow(reversed_lca, 'gray'), plt.title('reversed_lca')
-        plt.subplot(2, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
-        plt.subplot(2, 2, 3), plt.imshow(opening, 'gray'), plt.title('opening')
-        plt.subplot(2, 2, 4), plt.imshow(lca, 'gray'), plt.title('lca')
-        plt.show()
-        rt.append(result_)
+        # plt.figure()
+        # plt.subplot(2, 2, 1), plt.imshow(reversed_lca, 'gray'), plt.title('reversed_lca')
+        # plt.subplot(2, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
+        # plt.subplot(2, 2, 3), plt.imshow(opening, 'gray'), plt.title('opening')
+        # plt.subplot(2, 2, 4), plt.imshow(lca, 'gray'), plt.title('lca')
+        # plt.show()
+        if img_set.shape[1] != 512:
+            img_resize = cv2.resize(result_, (512, 512))
+            rt.append(img_resize)
+        else:
+            rt.append(result_)
     return rt, filename, slice_num
 
 
 if __name__ == '__main__':
-    samples = 'chestCT_round1/test/318818.mhd'
+    samples = '../chestCT_round1/test/318818.mhd'
     result = image_segmentor(samples)
     # plt.figure()
     # plt.subplot(2, 2, 1), plt.imshow(result[0], 'gray'), plt.title('test1')
