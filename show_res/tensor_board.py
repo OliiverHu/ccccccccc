@@ -10,7 +10,7 @@ import numpy as np
 
 
 def get_data(name, filename):
-    ea = event_accumulator.EventAccumulator('E:/XYM/YOLOv3/log_voc/events.out.tfevents.' + filename +'.DESKTOP-JKKB68D')
+    ea = event_accumulator.EventAccumulator('E:/Project/ChestCT/log_voc/events.out.tfevents.' + filename +'.user-System-Product-Name')
     ea.Reload()
     print(ea.scalars.Keys())
 
@@ -57,10 +57,10 @@ def get_data_all(name):
     # data += get_data(name, '1560851295')
     # data += get_data(name, '1560907058')
     # data += get_data(name, '1560915190')
-    data += get_data(name, '1561021365')
-    # data += get_data(name, '1560941436')
-    # data += get_data(name, '1561023285')
-    # data += get_data(name, '1561079596')
+    # data += get_data(name, '1562916351')
+    data += get_data(name, '1562917323')
+    data += get_data(name, '1562917787')
+    data += get_data(name, '1562921929')
 
 
     return data

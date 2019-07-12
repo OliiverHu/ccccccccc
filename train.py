@@ -258,7 +258,7 @@ def _main_(args):
 
         train_model.fit_generator(
             generator        = train_generator,
-            steps_per_epoch  = len(train_generator) * config['train']['train_times'],
+            steps_per_epoch  = (len(train_generator) * config['train']['train_times'])//3,
             epochs           = config['train']['nb_epochs'] + config['train']['warmup_epochs'],
             verbose          = 2 if config['train']['debug'] else 1,
             callbacks        = callbacks,

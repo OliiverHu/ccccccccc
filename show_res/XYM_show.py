@@ -9,6 +9,7 @@ def data2img(data_ini, size_h, size_w, color=2):
     min_data = np.min(data)
     print('max:' + str(max_data))
     print('min:' + str(min_data))
+    print('***************************')
 
     if max_data < (min_data+1e-5):
         multi = 0

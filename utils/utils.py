@@ -267,7 +267,7 @@ def preprocess_input(image, net_h, net_w):
     resized = cv2.resize(image[:, :, ::-1]/255., (new_w, new_h))
 
     # embed the image into the standard letter box
-    new_image = np.ones((net_h, net_w, 3)) * 0.5
+    new_image = np.ones((net_h, net_w, 5)) * 0.5
     new_image[(net_h-new_h)//2:(net_h+new_h)//2, (net_w-new_w)//2:(net_w+new_w)//2, :] = resized
     new_image = np.expand_dims(new_image, 0)
 
