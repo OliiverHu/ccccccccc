@@ -174,7 +174,6 @@ class BatchGenerator(Sequence):
 
         if image is None:
             print('Cannot find ', image_name)
-        image = image[:,:,::-1] # RGB image
             
         image_h, image_w, _ = image.shape
         

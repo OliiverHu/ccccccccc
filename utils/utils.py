@@ -223,6 +223,7 @@ def decode_netout(netout, anchors, obj_thresh, net_h, net_w):
         for b in range(nb_box):
             # 4th element is objectness score
             objectness = netout[row, col, b, 0]
+            inf, sup = netout[row, col, b, 5], netout[row, col, b, 6]
             
             if objectness <= obj_thresh:
                 continue
@@ -244,7 +245,7 @@ def decode_netout(netout, anchors, obj_thresh, net_h, net_w):
             # last elements are class probabilities
             classes = netout[row,col,b,7:]
             
-            box = BoundBox(x-w/2, y-h/2, x+w/2, y+h/2, objectness, classes)
+            box = BoundBox(x-w/2, y-h/2, x+w/2, y+h/2, objectness, classes, inf, sup)
 
             boxes.append(box)
 

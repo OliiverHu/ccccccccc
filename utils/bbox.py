@@ -5,7 +5,7 @@ from .colors import get_color
 
 
 class BoundBox:
-    def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None):
+    def __init__(self, xmin, ymin, xmax, ymax, c = None, classes = None, inf = 1, sup = 1):
         self.xmin = xmin
         self.ymin = ymin
         self.xmax = xmax
@@ -13,6 +13,9 @@ class BoundBox:
         
         self.c       = c
         self.classes = classes
+
+        self.inf = inf
+        self.sup = sup
 
         self.label = -1
         self.score = -1
@@ -91,6 +94,7 @@ def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
         
     return image
 
+
 def get_box_info(line, boxes, labels, obj_thresh):
     for box in boxes:
         label = -1
@@ -107,7 +111,8 @@ def get_box_info(line, boxes, labels, obj_thresh):
             box.ymin = 0
 
         if label >= 0:
-            line += ' %.6f %d %d %d %d \n'% (box.get_score(), box.xmin, box.ymin, box.xmax, box.ymax)
+            line += ' %.6f %d %d %d %d %.6f %.6f \n'% \
+                    (box.get_score(), box.xmin, box.ymin, box.xmax, box.ymax, box.inf, box.sup)
 
     newline = line[:-1]
     return newline
