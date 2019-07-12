@@ -1,2 +1,2 @@
 # ChestCT
-tianchi Chest CT competition v1.0
+a 3D CNN(based on yolo) for tianchi Chest CT competition v1.0
