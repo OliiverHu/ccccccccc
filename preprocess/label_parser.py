@@ -3,7 +3,7 @@ import preprocess.coordinates_translator as translator
 import numpy as np
 
 
-def file_parser_interface(mhdfile_path_list, anno_path, out_path):
+def file_parser_interface(mhdfile_path_list, csv_file_handle, out_path):
     """
     :Function a raw format file parser, to generate npy files and corresponding labels for dl training
     :param mhdfile_path_list: a list of mhd file path
@@ -16,24 +16,27 @@ def file_parser_interface(mhdfile_path_list, anno_path, out_path):
         file_name = tool_packages.get_filename(path)
         img_set, origin, spacing = tool_packages.raw_image_reader(path)
         slice_num, width, height = img_set.shape
+        param1 = 1
+        if width != 512:
+            param1 = label_normalization_parameter(width)
         for i in range(2, slice_num-2, 1):
-            label_parser(out_path + file_name, anno_path, origin, spacing, i, path)
+            label_parser(out_path + file_name, origin, spacing, i, path, csv_file_handle, param1)
 
         count += 1
         print('file processed: ' + str(count) + '/' + str(length))
 
 
-def label_parser(file_name, annotation_path, origin_pos, spacing_interval, slice_num, def_path):
-    csv_file = tool_packages.read_csv(annotation_path)
+def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, csv_file_handle, resize_coefficient):
+    # csv_file = tool_packages.read_csv(annotation_path)
     ab_name = tool_packages.get_filename(file_name)
     # print(ab_name)
-    labels = tool_packages.get_label_coords(csv_file, ab_name)
+    labels = tool_packages.get_label_coords(csv_file_handle, ab_name)
     # print(labels)
     label_db = []
     for label in labels:
         world_coord = np.asarray([float(label[1]), float(label[2]), float(label[3])])
         diameter = np.asarray([float(label[4]), float(label[5]), float(label[6])])
-        max_coord, _, min_coord = translator.get_8_point(world_coord, diameter, origin_pos, spacing_interval)
+        max_coord, _, min_coord = translator.get_8_point(world_coord, diameter, origin_pos, spacing_interval, resize_coefficient)
         if max_coord[2] == min_coord[2]:
             # print(min_coord[2])
             if min_coord[2] == slice_num+1:
@@ -77,6 +80,12 @@ def label_parser(file_name, annotation_path, origin_pos, spacing_interval, slice
 
     file.close()
     return None
+
+
+def label_normalization_parameter(w):
+    coefficient = 512 / w
+
+    return coefficient
 
 
 # if __name__ == '__main__':

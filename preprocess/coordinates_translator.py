@@ -11,9 +11,9 @@ convert world coordinate to real coordinate
 """
 
 
-def get_8_point(point0, whl0, origin, spacing):
+def get_8_point(point0, whl0, origin, spacing, resize_coefficient):
     point0, whl0 = mm2pix(point0, whl0, origin, spacing)
-    points = tran_data(point0, whl0)
+    points = tran_data(point0, whl0, resize_coefficient)
 
     return points[0], points, points[7]
 
@@ -38,7 +38,7 @@ def mm2pix(point, whl, origin, spacing):
     return list(out_point), list(out_whl)
 
 
-def tran_data(point0, whl0, tran_type=1):
+def tran_data(point0, whl0, resize_coefficient, tran_type=1):
     case = [[ 1, 1, 1],
             [ 1, 1,-1],
             [ 1,-1, 1],
@@ -51,14 +51,23 @@ def tran_data(point0, whl0, tran_type=1):
         points = []
         for k in range(8):
             point = [0, 0, 0]
-            for i in range(3):
+            for i in range(2):
                 point[i] = point0[i] + case[k][i] * (whl0[i]-1)/2
+                point[i] *= resize_coefficient
                 if point[i] - int(point[i]) < 1E-3 or int(point[i]) - point[i] + 1 < 1E-3:
                     if point[i] < -0.5:
                         print('wrong data!(find <0)')
                     point[i] = int(point[i] + 0.1)
                 else:
                     print('wrong data!(find .5)')
+            i = 3
+            point[i] = point0[i] + case[k][i] * (whl0[i] - 1) / 2
+            if point[i] - int(point[i]) < 1E-3 or int(point[i]) - point[i] + 1 < 1E-3:
+                if point[i] < -0.5:
+                    print('wrong data!(find <0)')
+                point[i] = int(point[i] + 0.1)
+            else:
+                print('wrong data!(find .5)')
             points.append(point)
         return points
     else:

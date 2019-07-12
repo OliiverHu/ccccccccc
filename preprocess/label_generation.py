@@ -1,5 +1,5 @@
 from preprocess.label_parser import file_parser_interface
-from preprocess.tool_packages import get_mhd_path
+from preprocess.tool_packages import get_mhd_path, read_csv
 
 
 def label_generation():
@@ -10,6 +10,7 @@ def label_generation():
     win_dir_path = ['/home/huyunfei/ct_scan/ChestCT/data/']
 
     annotation_path = '/home/huyunfei/ct_scan/chestCT_round1_annotation.csv'
+    csv_file_handle = read_csv(annotation_path)
     # out_dir = '/home/huyunfei/ct_scan/processed_data/'
     out_dir = '/home/huyunfei/ct_scan/ChestCT/data_out/'
 
@@ -18,4 +19,4 @@ def label_generation():
         tmp = get_mhd_path(path)
         mhd_path_list += tmp
 
-    file_parser_interface(mhd_path_list, annotation_path, out_dir)
+    file_parser_interface(mhd_path_list, csv_file_handle, out_dir)

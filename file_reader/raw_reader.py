@@ -11,6 +11,8 @@ def raw_reader(path, i):
     # file_name = tool_packages.get_filename(path)
     img_set, origin, spacing = tool_packages.raw_image_reader(path)
     masked_img = []
+    if i-2 < 0 or i+3 >img_set.shape[0]:
+        return None
     for j in range(i - 2, i + 3, 1):
         image = np.squeeze(img_set[j, ...])
         masked_img.append(image)
