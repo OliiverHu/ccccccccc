@@ -272,7 +272,8 @@ def create_yolov3_model(
                         {'filter': 256, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 14}])
 
     # Layer 16 => 36
-    for i in range(7):
+    # 7
+    for i in range(2):
         x = _conv_block(x, [{'filter': 128, 'kernel': 1, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 16+i*3},
                             {'filter': 256, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 17+i*3}])
         
@@ -284,7 +285,8 @@ def create_yolov3_model(
                         {'filter': 512, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 39}])
 
     # Layer 41 => 61
-    for i in range(7):
+    # 7
+    for i in range(2):
         x = _conv_block(x, [{'filter': 256, 'kernel': 1, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 41+i*3},
                             {'filter': 512, 'kernel': 3, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 42+i*3}])
         
@@ -313,7 +315,7 @@ def create_yolov3_model(
     loss_yolo_1 = YoloLayer(anchors[12:], 
                             [1*num for num in max_grid], 
                             batch_size, 
-                            warmup_batches, 
+                            warmup_batches,
                             ignore_thresh, 
                             grid_scales[0],
                             obj_scale,
