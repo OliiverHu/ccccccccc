@@ -10,7 +10,10 @@ import numpy as np
 
 
 def get_data(name, filename):
-    ea = event_accumulator.EventAccumulator('E:/XYM/YOLOv3/log_voc/events.out.tfevents.' + filename +'.DESKTOP-JKKB68D')
+    # ea = event_accumulator.EventAccumulator('E:/Project/ChestCT/log_voc/events.out.tfevents.'
+    #                                         + filename + '.user-System-Product-Name')
+    ea = event_accumulator.EventAccumulator('E:/Project/ChestCT/log_voc/events.out.tfevents.'
+                                            + filename + '.DESKTOP-50KJA8U')
     ea.Reload()
     print(ea.scalars.Keys())
 
@@ -53,23 +56,29 @@ def do_mean(data, mean=0):
 def get_data_all(name):
     data = []
 
-    # data += get_data(name, '1560843497')
-    # data += get_data(name, '1560851295')
+    data += get_data(name, '1563002218')
+    data += get_data(name, '1563024998')
     # data += get_data(name, '1560907058')
     # data += get_data(name, '1560915190')
-    data += get_data(name, '1561021365')
-    # data += get_data(name, '1560941436')
-    # data += get_data(name, '1561023285')
-    # data += get_data(name, '1561079596')
-
+    # data += get_data(name, '1562916351')
+    # data += get_data(name, '1562917323')
+    # data += get_data(name, '1562917787')
+    # data += get_data(name, '1562921929')
 
     return data
 
+
 def plot_line(name, axi):
     data = get_data_all(name)
-    y = do_mean(data, 100)
+    if name == 'lr':
+        y = do_mean(data, 1)
+        y = np.log10(y)
+        print(y)
+    else:
+        y = do_mean(data, 100)
     # axi.plot([i.step for i in data], [i.value for i in data], label=name)
     axi.plot([i*100 for i in range(len(y))], y, label=name)
+
 
 fig = plt.figure(figsize=(6, 4))
 ax1 = fig.add_subplot(111)

@@ -60,7 +60,8 @@ def tran_data(point0, whl0, resize_coefficient, tran_type=1):
                     point[i] = int(point[i] + 0.1)
                 else:
                     print('wrong data!(find .5)')
-            i = 3
+                    point[i] = int(point[i] + 0.5)
+            i = 2
             point[i] = point0[i] + case[k][i] * (whl0[i] - 1) / 2
             if point[i] - int(point[i]) < 1E-3 or int(point[i]) - point[i] + 1 < 1E-3:
                 if point[i] < -0.5:
@@ -68,6 +69,7 @@ def tran_data(point0, whl0, resize_coefficient, tran_type=1):
                 point[i] = int(point[i] + 0.1)
             else:
                 print('wrong data!(find .5)')
+                point[i] = int(point[i] + 0.5)
             points.append(point)
         return points
     else:

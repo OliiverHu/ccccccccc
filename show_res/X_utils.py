@@ -63,39 +63,39 @@ def decode_netout(netout_ini, img_name):
     grid_h, grid_w = netout.shape[:2]
     nb_box = 3
     netout = netout.reshape((grid_h, grid_w, nb_box, -1))
-    nb_class = netout.shape[-1] - 5
+    nb_class = netout.shape[-1] - 7
 
     img_path = 'E:/Training/VOCdevkit/VOC2012/my_training/Class5_picture_out/'
 
     boxes = []
 
-    netout[..., :2] = _sigmoid(netout[..., :2])
-    netout[..., 4] = _sigmoid(netout[..., 4])
+    netout[..., 0] = _sigmoid(netout[..., 0])
+    netout[..., 1:3] = _sigmoid(netout[..., 1:3])
     # netout[..., 5:] *= netout[..., 5:] > obj_thresh
-    test_class_p = netout[..., 5:]
+    # test_class_p = netout[..., 5:]
 
-    img = netout[..., 4].copy()
-    img = np.amax(img, -1)
-    img = XYM_show.data2img(img, grid_h, grid_w)
-    img = XYM_show.exp_img(img, 416 // grid_h)
-    cv2.imwrite(img_path + img_name + '_box.jpg', img)
+    # img = netout[..., 4].copy()
+    # img = np.amax(img, -1)
+    # img = XYM_show.data2img(img, grid_h, grid_w)
+    # img = XYM_show.exp_img(img, 416 // grid_h)
+    # cv2.imwrite(img_path + img_name + '_box.jpg', img)
 
-    img = netout[..., 5:].copy()
+    # img = netout[..., 5:].copy()
+    # img = np.amax(img, -1)
+    # # img = img[..., 4]
+    # img = np.amax(img, -1)
+    # img = XYM_show.data2img(img, grid_h, grid_w)
+    # img = XYM_show.exp_img(img, 416 // grid_h)
+    # cv2.imwrite(img_path + img_name + '_class.jpg', img)
+
+    netout[..., 7:] = netout[..., 0][..., np.newaxis] * _softmax(netout[..., 7:])
+    img = netout[..., 7:].copy()
     img = np.amax(img, -1)
     # img = img[..., 4]
     img = np.amax(img, -1)
     img = XYM_show.data2img(img, grid_h, grid_w)
-    img = XYM_show.exp_img(img, 416 // grid_h)
-    cv2.imwrite(img_path + img_name + '_class.jpg', img)
-
-    netout[..., 5:] = netout[..., 4][..., np.newaxis] * _softmax(netout[..., 5:])
-    img = netout[..., 5:].copy()
-    img = np.amax(img, -1)
-    # img = img[..., 4]
-    img = np.amax(img, -1)
-    img = XYM_show.data2img(img, grid_h, grid_w)
-    img = XYM_show.exp_img(img, 416 // grid_h)
-    cv2.imwrite(img_path + img_name + '_class_box.jpg', img)
+    # img = XYM_show.exp_img(img, 416 // grid_h)
+    # cv2.imwrite(img_path + img_name + '_class_box.jpg', img)
 
     return
 
