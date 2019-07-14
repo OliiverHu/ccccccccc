@@ -100,18 +100,23 @@ def image_masked(img_mask, img):
     return img_mask * img
 
 
-def segmentation_interface():
-    mhd_dir = 'E:/tianchi-chestCT/chestCT_round1/train_part1/'
+def segmentation_interface(mhd_dir, out_dir):
+    # mhd_dir = 'E:/tianchi-chestCT/chestCT_round1/train_part1/'
     # annotation_path = 'chestCT_round1_annotation.csv'
-    out_dir = 'C:/Users/OliverHu/Desktop/anonymous/'
-    samples_ = random_sampling(mhd_dir)
-    for path in samples_:
-        a = time.time()
+    # out_dir = 'C:/Users/OliverHu/Desktop/anonymous/'
+    # samples_ = random_sampling(mhd_dir)
+    mhd_path_list = tool_packages.get_mhd_path(mhd_dir)
+    length = len(mhd_path_list)
+    count = 0
+    for path in mhd_path_list:
+        # a = time.time()
         np_array, fname, slicenum = image_segmentor(path)
         tool_packages.raw_image_writer(np_array, out_dir + fname + '.mhd')
-        b = time.time()
-        print('elapse: ' + str(b-a))
-        print('slices:' + str(slicenum))
+        # b = time.time()
+        # print('elapse: ' + str(b-a))
+        # print('slices:' + str(slicenum))
+        count += 1
+        print('file processed: ' + str(count) + '/' + str(length))
     # print(samples)
 
     return None

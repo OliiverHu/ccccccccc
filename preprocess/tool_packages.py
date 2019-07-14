@@ -25,19 +25,28 @@ def get_mhd_path(mhd_dir):
     return mhd_paths
 
 
-def get_label_coords(annotation_csv, name):
+def get_label_coords(annotation_csv, name, overlapping_test=False):
     """
     # to get the label info in csv file
     # annotation_csv: a csv file handler(list)
     # name: the id of mhd file
     # return: all rowdata in annotation file which matches the name(input)
     """
-    labels = []  # np.zeros((50, 8), dtype=float)
-    for row in annotation_csv:
-        if row[0] == name:
-            labels.append(row)
-        else:
-            pass
+    labels = []  # np.zeros((50, 8), dtype=
+    if overlapping_test is False:
+        for row in annotation_csv:
+            if row[0] == name:
+                labels.append(row)
+            else:
+                pass
+    else:
+        for row in annotation_csv:
+            if row[0] != 'seriesuid':
+                for i in range(len(row)):
+                    row[i] = float(row[i])
+                labels.append(row)
+            else:
+                pass
 
     return labels
 
