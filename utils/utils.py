@@ -303,11 +303,11 @@ def get_yolo_boxes(model, images, net_h, net_w, anchors, obj_thresh, nms_thresh,
 
         # decode the output of the network
         for j in range(len(yolos)):
-            if imagename is None:
-                pass
-            else:
-                print('yolo:                     ' + str(j+1))
-                X_utils.decode_netout(yolos[j], imagename + 'layer'+str(j+1))
+            # if imagename is None:
+            #     pass
+            # else:
+            #     print('yolo:                     ' + str(j+1))
+            #     X_utils.decode_netout(yolos[j], imagename + 'layer'+str(j+1))
 
             yolo_anchors = anchors[(2-j)*6:(3-j)*6] # config['model']['anchors']
             boxes += decode_netout(yolos[j], yolo_anchors, obj_thresh, net_h, net_w)

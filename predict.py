@@ -92,8 +92,8 @@ def _main_(args):
                 # draw bounding boxes on the image using labels
                 # print('boxes:' + str(len(boxes)))
 
-                # draw_boxes(image_ini, boxes, sorted(config['model']['labels']),
-                #            obj_thresh, output_path + imagename + '_' + str(slice_i) + '.jpg')
+                draw_boxes(image_ini, boxes, sorted(config['model']['labels']),
+                           obj_thresh, output_path + imagename + '_' + str(slice_i) + '.jpg')
                 
                 # write the image with bounding boxes to file
                 # cv2.imwrite(output_path + imagename + '_' + str(slice_i) + '.jpg', np.uint8(image_ini))
