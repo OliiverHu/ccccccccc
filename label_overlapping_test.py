@@ -4,21 +4,6 @@ import utils.bbox as bbox
 import numpy as np
 
 
-def get_mhd_directly(mhd_path):
-    file = open(mhd_path, 'r')
-    lines = file.readlines()
-    # for line in lines[6] + lines[9]:
-    origin_ = lines[6].split(' = ')[1].replace('\n', "")
-    spacing_ = lines[9].split(' = ')[1].replace('\n', "")
-    origin_ = list(origin_.split(' '))
-    spacing_ = list(spacing_.split(' '))
-    for j in range(len(origin_)):
-        origin_[j] = float(origin_[j])
-    for j in range(len(spacing_)):
-        spacing_[j] = float(spacing_[j])
-    return [origin_[0], origin_[1], origin_[2], spacing_[0], spacing_[1], spacing_[2]]
-
-
 annotation = tool_packages.read_csv('do_not_git/chestCT_round1_annotation.csv')
 labels = tool_packages.get_label_coords(annotation, '', overlapping_test=True)
 # print(labels[0])
@@ -39,7 +24,7 @@ name_list = []
 for path in mhd_path_list:
     file_name = tool_packages.get_filename(path)
     # name_list.append(file_name)
-    origin_spacing_list = get_mhd_directly(path)
+    origin_spacing_list = tool_packages.get_mhd_directly(path)
     item.append((file_name, origin_spacing_list))
     # print(origin_spacing_list)
 
