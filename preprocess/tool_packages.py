@@ -83,8 +83,8 @@ def write_csv(csv_file_path, list):
     # return: file handler
     """
     with open(csv_file_path, "a+", newline='') as f:
-        spamwriter = csv.writer(f, quotechar=',', quoting=csv.QUOTE_MINIMAL)
-        spamwriter.writerow(list)
+        writer = csv.writer(f, quotechar=',', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(list)
     return None
 
 
@@ -103,6 +103,21 @@ def raw_image_reader(filename):
 def raw_image_writer(numpy_array, save_dir):
     writer = sitk.GetImageFromArray(numpy_array)
     sitk.WriteImage(writer, save_dir)
+
+
+def get_mhd_directly(mhd_path):
+    file = open(mhd_path, 'r')
+    lines = file.readlines()
+    # for line in lines[6] + lines[9]:
+    origin_ = lines[6].split(' = ')[1].replace('\n', "")
+    spacing_ = lines[9].split(' = ')[1].replace('\n', "")
+    origin_ = list(origin_.split(' '))
+    spacing_ = list(spacing_.split(' '))
+    for j in range(len(origin_)):
+        origin_[j] = float(origin_[j])
+    for j in range(len(spacing_)):
+        spacing_[j] = float(spacing_[j])
+    return [origin_[0], origin_[1], origin_[2], spacing_[0], spacing_[1], spacing_[2]]
 
 
 # if __name__ == '__main__':
