@@ -1,8 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-import cv2
-from .colors import get_color
 
 
 class BoundBox:
@@ -33,6 +30,7 @@ class BoundBox:
             
         return self.score      
 
+
 def _interval_overlap(interval_a, interval_b):
     x1, x2 = interval_a
     x3, x4 = interval_b
@@ -47,6 +45,7 @@ def _interval_overlap(interval_a, interval_b):
              return 0
         else:
             return min(x2,x4) - x3    
+
 
 def bbox_iou(box1, box2):
     intersect_w = _interval_overlap([box1.xmin, box1.xmax], [box2.xmin, box2.xmax])
