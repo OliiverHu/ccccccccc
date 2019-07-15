@@ -1,6 +1,8 @@
 import numpy as np
 from utils.bbox import BoundBox, bbox_iou
 import os
+from preprocess.tool_packages import get_mhd_directly
+from preprocess.coordinates_translator import pix2mm
 
 
 def cal_conf(data_list):
@@ -160,20 +162,31 @@ class Labels3D():
         conf = cal_conf([label['conf'] for label in label_3D])
         label_class = label_3D[0]['class']
 
-        return conf, xmax, xmin, ymax, ymin, zmax, zmin, label_class
+        return xmax, xmin, ymax, ymin, zmax, zmin, label_class, conf
 
-    def out_put(self, labels_3D, filename):
+    def tran_data(self, data, mhd_name):
+        position = get_mhd_directly(mhd_name)
+        origin = position[:3]
+        spacing = position[3:]
+        point0 = [(data[0]+data[1])/2, (data[2]+data[3])/2, (data[4]+data[5])/2]
+        whl0 = [data[0]-data[1], data[2]-data[3], data[4]-data[5]]
+        point0, whl0 = pix2mm(point0, whl0, origin, spacing)
+        return point0[0], point0[1], point0[2], data[6], data[7]
+
+    def out_put(self, labels_3D, txt_name, mhd_name):
         newline = ''
         for label_3D in labels_3D:
             data = self.build_3D(label_3D)
-            newline += ' %.6f %d %d %d %d %d %d %d \n' % data
-        with open(filename, 'w') as f:
+            data = self.tran_data(data, mhd_name)
+            newline += ' %.6f %.6f %.6f %d %.6f \n' % data
+        with open(txt_name, 'w') as f:
             f.write(newline)
 
 
 if __name__ == '__main__':
     txt_dir = 'E:/Training/chestCT/test_output/'
     out_dir = 'E:/Training/chestCT/test_output_3D/'
+    mhd_dir = 'E:/Training/chestCT/test_input/'
     txt_paths = []
     for inp_file in os.listdir(txt_dir):
         txt_paths += [txt_dir + inp_file]
@@ -191,4 +204,4 @@ if __name__ == '__main__':
 
     for raw in seen_raw:
         Func = Labels3D(0.5, 0.5)
-        Func.out_put(Func.get_all_data(seen_raw[raw]), out_dir + raw + '.txt')
+        Func.out_put(Func.get_all_data(seen_raw[raw]), out_dir + raw + '.txt', mhd_dir + raw + '.mhd')
