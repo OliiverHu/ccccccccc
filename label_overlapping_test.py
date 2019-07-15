@@ -29,7 +29,7 @@ linux_dir_path = ['E:/tianchi-chestCT/chestCT_round1/train_part1/', 'E:/tianchi-
 
 mhd_path_list = []
 for path in linux_dir_path:
-    tmp = tool_packages.get_mhd_path(path)
+    tmp = tool_packages.get_path(path, 'mhd')
     mhd_path_list += tmp
 
 length = len(mhd_path_list)

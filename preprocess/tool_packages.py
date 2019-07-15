@@ -6,23 +6,25 @@ import matplotlib.pyplot as plt
 from preprocess.coordinates_translator import get_8_point
 
 
-def get_mhd_path(mhd_dir):
+def get_path(dir, format):
     """
     # mhd_dir: mhd_dir path to a dir containing mhd files
+    # type: file format
     # return: a list of def path of all mhd files in mhd_dir
     #
     """
-    mhd_paths = []
+    paths = []
+    type_ = ['.' + format]
 
-    if os.path.isdir(mhd_dir):
-        for inp_file in os.listdir(mhd_dir):
-            mhd_paths += [mhd_dir + inp_file]
+    if os.path.isdir(dir):
+        for inp_file in os.listdir(dir):
+            paths += [dir + inp_file]
     else:
-        mhd_paths += [mhd_dir]
+        paths += [dir]
 
-    mhd_paths = [inp_file for inp_file in mhd_paths if (inp_file[-4:] in ['.mhd'])]
+    paths = [inp_file for inp_file in paths if (inp_file[-4:] in type_)]
 
-    return mhd_paths
+    return paths
 
 
 def get_label_coords(annotation_csv, name, overlapping_test=False):
@@ -72,6 +74,18 @@ def read_csv(filename):
         for line in csvreader:
             lines.append(line)
     return lines
+
+
+def write_csv(csv_file_path, list):
+    """
+    # csv file writer
+    # filename: the path to text file
+    # return: file handler
+    """
+    with open(csv_file_path, "a+", newline='') as f:
+        spamwriter = csv.writer(f, quotechar=',', quoting=csv.QUOTE_MINIMAL)
+        spamwriter.writerow(list)
+    return None
 
 
 def raw_image_reader(filename):

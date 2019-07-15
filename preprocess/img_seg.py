@@ -46,7 +46,7 @@ def random_sampling(dir_path):
     :param dir_path: path to mhd file directory
     :return: randomly selected samples from the directory pool
     """
-    mhd_path_list = tool_packages.get_mhd_path(dir_path)
+    mhd_path_list = tool_packages.get_path(dir_path, 'mhd')
     # sample_count = int(len(mhd_path_list) / 20)
     sample_count = 1
     sampling = random.sample(mhd_path_list, sample_count)
@@ -105,7 +105,7 @@ def segmentation_interface(mhd_dir, out_dir):
     # annotation_path = 'chestCT_round1_annotation.csv'
     # out_dir = 'C:/Users/OliverHu/Desktop/anonymous/'
     # samples_ = random_sampling(mhd_dir)
-    mhd_path_list = tool_packages.get_mhd_path(mhd_dir)
+    mhd_path_list = tool_packages.get_path(mhd_dir, 'mhd')
     length = len(mhd_path_list)
     count = 0
     for path in mhd_path_list:
