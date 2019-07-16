@@ -38,8 +38,8 @@ def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, c
     :return: None
     """
     # csv_file = tool_packages.read_csv(annotation_path)
-    # ab_name = tool_packages.get_filename(file_name)
-    labels = tool_packages.get_label_coords(csv_file_handle, file_name)
+    ab_name = tool_packages.get_filename(file_name)
+    labels = tool_packages.get_label_coords(csv_file_handle, ab_name)
 
     label_db = []
     for label in labels:
