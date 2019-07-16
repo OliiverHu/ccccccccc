@@ -53,6 +53,70 @@ def get_label_coords(annotation_csv, name, overlapping_test=False):
     return labels
 
 
+def get_label_dict(labels, mhd_path_list, translator=False):
+    """
+    :param labels: csv file handler
+    :return: a dict with key(filename) and value(labels)
+    """
+    label_db = []
+    name_list = []
+    label_item = []
+    origin_spacing_dict = get_origin_spacing_dict(mhd_path_list)
+    for i in range(len(labels)):
+        key = str(int(labels[i][0]))
+        try:
+            origin_spacing = origin_spacing_dict[key]
+        except KeyError:
+            continue
+        if translator is True:
+            center = np.asarray([float(labels[i][1]), float(labels[i][2]), float(labels[i][3])])
+            diameter = np.asarray([float(labels[i][4]), float(labels[i][5]), float(labels[i][6])])
+            max_coord, _, min_coord = get_8_point(center, diameter,
+                                                  [origin_spacing[0], origin_spacing[1], origin_spacing[2]],
+                                                  [origin_spacing[3], origin_spacing[4], origin_spacing[5]], 1)
+            label_db.append(
+                [min_coord[0], min_coord[1], min_coord[2], max_coord[0], max_coord[1], max_coord[2], int(labels[i][7])])
+            if i != len(labels) - 1:
+                if key == str(int(labels[i + 1][0])):
+                    pass
+                else:
+                    label_item.append((key, label_db))
+                    name_list.append(key)
+                    label_db = []
+            else:
+                pass
+        else:
+            label_db.append([float(labels[i][1]), float(labels[i][2]), float(labels[i][3]),
+                             float(labels[i][4]), float(labels[i][5]), float(labels[i][6]),
+                             int(labels[i][7])])
+            print(label_db)
+            if i != len(labels) - 1:
+                if key == str(int(labels[i + 1][0])):
+                    pass
+                else:
+                    label_item.append((key, label_db))
+                    name_list.append(key)
+                    label_db = []
+            else:
+                pass
+
+    label_dict = dict(label_item)
+    return label_dict, name_list
+
+
+def get_origin_spacing_dict(mhd_path_list):
+    item = []
+    for path in mhd_path_list:
+        file_name = get_filename(path)
+        # name_list.append(file_name)
+        origin_spacing_list = get_mhd_directly(path)
+        item.append((file_name, origin_spacing_list))
+        # print(origin_spacing_list)
+
+    dictionary = dict(item)
+    return dictionary
+
+
 def get_filename(file_path):
     """
     # get file name

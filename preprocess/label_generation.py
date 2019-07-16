@@ -1,5 +1,5 @@
 from preprocess.label_parser import file_parser_interface
-from preprocess.tool_packages import get_mhd_path, read_csv
+from preprocess.tool_packages import get_path, read_csv
 
 
 def label_generation():
@@ -16,7 +16,7 @@ def label_generation():
 
     mhd_path_list = []
     for path in win_dir_path:
-        tmp = get_mhd_path(path)
+        tmp = get_path(path, 'mhd')
         mhd_path_list += tmp
 
     file_parser_interface(mhd_path_list, csv_file_handle, out_dir)
