@@ -53,37 +53,48 @@ def random_sampling(dir_path):
     return sampling
 
 
-def whole_hist_viz(image, max_thres, min_thres, name, slice_id):
-    """
-    histogram drawing for each slice to determine the suitable threshold
-    for segmentation
-    """
-    MIN_BOUND = -1000
-    MAX_BOUND = 800
-    if max_thres < MAX_BOUND:
-        MAX_BOUND = max_thres
-    if min_thres > MIN_BOUND:
-        MIN_BOUND = min_thres
-    image[image > MAX_BOUND] = MAX_BOUND
-    image[image < MIN_BOUND] = MIN_BOUND
-    plt.hist(image.ravel(), max_thres - min_thres, [min_thres, max_thres], density=True)
-    plt.title(name + '_slice' + slice_id, fontsize='large', fontweight='bold')
-    plt.show()
+# def whole_hist_viz(image, max_thres, min_thres, name, slice_id):
+#     """
+#     histogram drawing for each slice to determine the suitable threshold
+#     for segmentation
+#     """
+#     MIN_BOUND = -1000
+#     MAX_BOUND = 800
+#     if max_thres < MAX_BOUND:
+#         MAX_BOUND = max_thres
+#     if min_thres > MIN_BOUND:
+#         MIN_BOUND = min_thres
+#     image[image > MAX_BOUND] = MAX_BOUND
+#     image[image < MIN_BOUND] = MIN_BOUND
+#     plt.hist(image.ravel(), max_thres - min_thres, [min_thres, max_thres], density=True)
+#     plt.title(name + '_slice' + slice_id, fontsize='large', fontweight='bold')
+#     plt.show()
 
 
-def img_windowing(image, max_thres, min_thres):
+def img_windowing(image, max_thres, min_thres, lung=True):
     # normalize pixels to 0 ~ 1
-    MIN_BOUND = -1000.0
-    MAX_BOUND = 800.0
-    if max_thres < MAX_BOUND:
-        MAX_BOUND = max_thres
-    if min_thres > MIN_BOUND:
-        MIN_BOUND = min_thres
-    image[image > MAX_BOUND] = MAX_BOUND
-    image[image < MIN_BOUND] = MIN_BOUND
-    image = np.uint8((image - MIN_BOUND) / (MAX_BOUND - MIN_BOUND) * 255)
-    _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    # print(image.dtype)
+    if lung is True:
+        min_bound = -1000.0
+        max_bound = 200.0
+        if max_thres < max_bound:
+            max_bound = max_thres
+        if min_thres > min_bound:
+            min_bound = min_thres
+        image[image > max_bound] = max_bound
+        image[image < min_bound] = min_bound
+        image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
+        _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    else:
+        min_bound = -200.0
+        max_bound = 1000.0
+        if max_thres < max_bound:
+            max_bound = max_thres
+        if min_thres > min_bound:
+            min_bound = min_thres
+        image[image > max_bound] = max_bound
+        image[image < min_bound] = min_bound
+        image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
+        _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return image, seg_thres
 
 
@@ -100,17 +111,16 @@ def image_masked(img_mask, img):
     return img_mask * img
 
 
-def segmentation_interface(mhd_dir, out_dir):
-    # mhd_dir = 'E:/tianchi-chestCT/chestCT_round1/train_part1/'
-    # annotation_path = 'chestCT_round1_annotation.csv'
-    # out_dir = 'C:/Users/OliverHu/Desktop/anonymous/'
-    # samples_ = random_sampling(mhd_dir)
+def segmentation_interface(mhd_dir, out_dir, button):
+
     mhd_path_list = tool_packages.get_path(mhd_dir, 'mhd')
     length = len(mhd_path_list)
     count = 0
     for path in mhd_path_list:
         # a = time.time()
-        np_array, fname, slicenum = image_segmentor(path)
+        img_set, _, __ = tool_packages.raw_image_reader(path)
+        file_name = tool_packages.get_filename(path)
+        np_array, fname, slicenum = image_segmentor(img_set, file_name, button=button)
         tool_packages.raw_image_writer(np_array, out_dir + fname + '.mhd')
         # b = time.time()
         # print('elapse: ' + str(b-a))
@@ -122,7 +132,7 @@ def segmentation_interface(mhd_dir, out_dir):
     return None
 
 
-def image_segmentor(mhdfile_path):
+def image_segmentor(image_array_3d, filename, button):
     """
     Utility: image segmentation for lung CT scan,
     params:
@@ -130,43 +140,46 @@ def image_segmentor(mhdfile_path):
     returns:
         mask array
     """
-    # mhd_path = path_to_file
-    filename = tool_packages.get_filename(mhdfile_path)
-    img_set, origin, spacing = tool_packages.raw_image_reader(mhdfile_path)
-
+    img_set = image_array_3d
     slice_num, width, height = img_set.shape
     rt = []
     # print(slice_num)
     for i in range(slice_num):
-        image = np.squeeze(img_set[i, ...])
+        image = np.squeeze(img_set[i])
 
         max_pixel_value = image.max()
         min_pixel_value = image.min()
 
-        image, segment_threshold = img_windowing(image, max_pixel_value, min_pixel_value)
+        image, segment_threshold = img_windowing(image, max_pixel_value, min_pixel_value, lung=button)
 
-        im2, contours, _ = cv2.findContours(segment_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # im2, contours, _ = cv2.findContours(segment_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # cv2.drawContours(image, contours, -1, (0, 0, 255), 3)
+        #
+        # cv2.imshow("img", image)
+        # cv2.waitKey(0)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
-        opening = cv2.morphologyEx(segment_threshold, cv2.MORPH_OPEN, kernel)
-        # closing = cv2.morphologyEx(segment_threshold, cv2.MORPH_CLOSE, kernel)
+        if button is True:
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+            opening = cv2.morphologyEx(segment_threshold, cv2.MORPH_OPEN, kernel)
+            # closing = cv2.morphologyEx(segment_threshold, cv2.MORPH_CLOSE, kernel)
 
-        lca = largest_connect_area(opening)
-        reversed_lca = largest_connect_area(binary_img_reverse(lca))
-        # print(reversed_lca[256][256])
-        if reversed_lca[256][256] == False:
-            reversed_lca = binary_img_reverse(reversed_lca)
-            # print(reversed_lca)
-        # reversed_lca = binary_img_reverse(lca)
+            lca = largest_connect_area(opening)
+            reversed_lca = largest_connect_area(binary_img_reverse(lca))
+            # print(reversed_lca[256][256])
+            if reversed_lca[256][256] == False:
+                reversed_lca = binary_img_reverse(reversed_lca)
+                # print(reversed_lca)
+            # reversed_lca = binary_img_reverse(lca)
 
-        result_ = image_masked(reversed_lca, image)
-
+            result_ = image_masked(reversed_lca, image)
+        else:
+            result_ = image
         """
         plt visualization below
         
         """
         # plt.figure()
-        # plt.subplot(2, 2, 1), plt.imshow(reversed_lca, 'gray'), plt.title('reversed_lca')
+        # plt.subplot(2, 2, 1), plt.imshow(image, 'gray'), plt.title('original')
         # plt.subplot(2, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
         # plt.subplot(2, 2, 3), plt.imshow(opening, 'gray'), plt.title('opening')
         # plt.subplot(2, 2, 4), plt.imshow(lca, 'gray'), plt.title('lca')
@@ -179,11 +192,12 @@ def image_segmentor(mhdfile_path):
     return rt, filename, slice_num
 
 
-if __name__ == '__main__':
-    samples = '../chestCT_round1/test/318818.mhd'
-    result = image_segmentor(samples)
+# if __name__ == '__main__':
+#     samples = '../chestCT_round1/test/318818.mhd'
+#     result, fn, s_num = image_segmentor(samples, True)  # true->lung. false->muscle, tissue, bone
     # plt.figure()
-    # plt.subplot(2, 2, 1), plt.imshow(result[0], 'gray'), plt.title('test1')
+    # plt.subplot(2, 2, 1),
+    # plt.imshow(result[10], 'gray'), plt.title('test1')
     # plt.subplot(2, 2, 2), plt.imshow(result[5], 'gray'), plt.title('test2')
     # plt.subplot(2, 2, 3), plt.imshow(result[10], 'gray'), plt.title('test3')
     # plt.subplot(2, 2, 4), plt.imshow(result[15], 'gray'), plt.title('test4')
