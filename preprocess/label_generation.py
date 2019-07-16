@@ -7,12 +7,12 @@ def label_generation():
                       '/home/huyunfei/ct_scan/ct_data/train_part3/', '/home/huyunfei/ct_scan/ct_data/train_part4/',
                       '/home/huyunfei/ct_scan/ct_data/train_part5/']
 
-    win_dir_path = ['/home/huyunfei/ct_scan/ChestCT/data/']
+    win_dir_path = ['chestCT_round1/test/']
 
-    annotation_path = '/home/huyunfei/ct_scan/chestCT_round1_annotation.csv'
+    annotation_path = 'do_not_git/chestCT_round1_annotation.csv'
     csv_file_handle = read_csv(annotation_path)
     # out_dir = '/home/huyunfei/ct_scan/processed_data/'
-    out_dir = '/home/huyunfei/ct_scan/ChestCT/data_out/'
+    out_dir = ''
 
     mhd_path_list = []
     for path in win_dir_path:

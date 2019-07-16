@@ -74,8 +74,8 @@ def random_sampling(dir_path):
 def img_windowing(image, max_thres, min_thres, lung=True):
     # normalize pixels to 0 ~ 1
     if lung is True:
-        min_bound = -1000.0
-        max_bound = 200.0
+        min_bound = -1500.0
+        max_bound = 500.0
         if max_thres < max_bound:
             max_bound = max_thres
         if min_thres > min_bound:
@@ -85,8 +85,8 @@ def img_windowing(image, max_thres, min_thres, lung=True):
         image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
         _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     else:
-        min_bound = -200.0
-        max_bound = 1000.0
+        min_bound = -145.0
+        max_bound = 235.0
         if max_thres < max_bound:
             max_bound = max_thres
         if min_thres > min_bound:
@@ -178,12 +178,12 @@ def image_segmentor(image_array_3d, filename, button):
         plt visualization below
         
         """
-        # plt.figure()
-        # plt.subplot(2, 2, 1), plt.imshow(image, 'gray'), plt.title('original')
-        # plt.subplot(2, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
+        plt.figure()
+        plt.subplot(1, 2, 1), plt.imshow(image, 'gray'), plt.title('original')
+        plt.subplot(1, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
         # plt.subplot(2, 2, 3), plt.imshow(opening, 'gray'), plt.title('opening')
         # plt.subplot(2, 2, 4), plt.imshow(lca, 'gray'), plt.title('lca')
-        # plt.show()
+        plt.show()
         if img_set.shape[1] != 512:
             img_resize = cv2.resize(result_, (512, 512))
             rt.append(img_resize)
@@ -192,9 +192,11 @@ def image_segmentor(image_array_3d, filename, button):
     return rt, filename, slice_num
 
 
-# if __name__ == '__main__':
-#     samples = '../chestCT_round1/test/318818.mhd'
-#     result, fn, s_num = image_segmentor(samples, True)  # true->lung. false->muscle, tissue, bone
+if __name__ == '__main__':
+    samples = '../chestCT_round1/test/320831.mhd'
+    img_set, _, __ = tool_packages.raw_image_reader(samples)
+    file_name = tool_packages.get_filename(samples)
+    result, fn, s_num = image_segmentor(img_set, file_name, True)  # true->lung. false->muscle, tissue, bone
     # plt.figure()
     # plt.subplot(2, 2, 1),
     # plt.imshow(result[10], 'gray'), plt.title('test1')
