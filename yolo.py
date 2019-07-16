@@ -245,7 +245,7 @@ def create_yolov3_model(
     xywh_scale,
     class_scale
 ):
-    input_image = Input(shape=(None, None, 5)) # net_h, net_w, 3
+    input_image = Input(shape=(None, None, 3)) # net_h, net_w, 3
     true_boxes  = Input(shape=(1, 1, 1, max_box_per_image, 4))
     true_yolo_1 = Input(shape=(None, None, len(anchors)//6, 1+4+2+nb_class)) # grid_h, grid_w, nb_anchor, 5+nb_class
     true_yolo_2 = Input(shape=(None, None, len(anchors)//6, 1+4+2+nb_class)) # grid_h, grid_w, nb_anchor, 5+nb_class

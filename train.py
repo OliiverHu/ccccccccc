@@ -204,7 +204,7 @@ def _main_(args):
             min_net_size        = config['model']['min_input_size'],
             max_net_size        = config['model']['max_input_size'],
             shuffle             = True,
-            jitter              = 0.3,
+            jitter              = 0.2,
             norm                = normalize
         )
     
@@ -258,7 +258,7 @@ def _main_(args):
 
         train_model.fit_generator(
             generator        = train_generator,
-            steps_per_epoch  = (len(train_generator) * config['train']['train_times'])//4,
+            steps_per_epoch  = (len(train_generator) * config['train']['train_times']),
             epochs           = config['train']['nb_epochs'] + config['train']['warmup_epochs'],
             verbose          = 2 if config['train']['debug'] else 1,
             callbacks        = callbacks,
@@ -269,7 +269,7 @@ def _main_(args):
     # keras.models.save_model(train_model, "backend.h5")
 
     # make a GPU version of infer_model for evaluation
-    if multi_gpu > 1:
+    if multi_gpu >= 1:
         infer_model = load_model(config['train']['saved_weights_name'])
 
     ###############################

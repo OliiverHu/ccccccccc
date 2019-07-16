@@ -3,13 +3,10 @@
 import os
 import argparse
 import json
-import cv2
 from utils.utils import get_yolo_boxes, makedirs
 from utils.bbox import draw_boxes, get_box_info
 from keras.models import load_model
-from tqdm import tqdm
 import numpy as np
-from train import create_model, create_training_instances
 from file_reader.raw_reader import raw_reader
 from preprocess.img_seg import img_windowing
 

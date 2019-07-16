@@ -39,7 +39,6 @@ class BatchGenerator(Sequence):
     def __len__(self):
         return int(np.ceil(float(len(self.instances))/self.batch_size))           
 
-
     def __getitem__(self, idx):
         # get image input size, change every 10 batches
         net_h, net_w = self._get_net_size(idx)
@@ -53,7 +52,7 @@ class BatchGenerator(Sequence):
             r_bound = len(self.instances)
             l_bound = r_bound - self.batch_size
 
-        x_batch = np.zeros((r_bound - l_bound, net_h, net_w, 5))             # input images
+        x_batch = np.zeros((r_bound - l_bound, net_h, net_w, 3))             # input images
         t_batch = np.zeros((r_bound - l_bound, 1, 1, 1,  self.max_box_per_image, 4))   # list of groundtruth boxes
 
         # initialize the inputs and the outputs
@@ -138,7 +137,7 @@ class BatchGenerator(Sequence):
                 true_box_index  = true_box_index % self.max_box_per_image    
 
             # assign input image to x_batch
-            if self.norm != None: 
+            if self.norm is not None:
                 x_batch[instance_count] = self.norm(img)
             else:
                 # plot image and bounding boxes for sanity check
@@ -178,16 +177,16 @@ class BatchGenerator(Sequence):
         image_h, image_w, _ = image.shape
         
         # determine the amount of scaling and cropping
-        # dw = self.jitter * image_w
-        # dh = self.jitter * image_h
-        dw = 0
-        dh = 0
+        dw = self.jitter * image_w
+        dh = self.jitter * image_h
+        # dw = 0
+        # dh = 0
 
-        new_ar = (image_w + np.random.uniform(-dw, dw)) / (image_h + np.random.uniform(-dh, dh))
+        new_ar = (image_w + np.random.normal(0, dw)) / (image_h + np.random.normal(0, dh))
         # scale = np.random.uniform(0.25, 2)
-        scale = np.random.uniform(0.85, 1.15)
+        scale = np.random.normal(1, 0.15)
 
-        if (new_ar < 1):
+        if new_ar < 1:
             new_h = int(scale * net_h)
             new_w = int(net_h * new_ar)
         else:
@@ -209,8 +208,23 @@ class BatchGenerator(Sequence):
             
         # correct the size and pos of bounding boxes
         all_objs = correct_bounding_boxes(instance['object'], new_w, new_h, net_w, net_h, dx, dy, flip, image_w, image_h)
+
+        im_sized = self.gauss_noise(im_sized, 0, 0.001)
         
-        return im_sized, all_objs   
+        return im_sized, all_objs
+
+    def gauss_noise(self, image, mean=0, var=0.001):
+        # '''
+        # 添加高斯噪声
+        # mean : 均值
+        # var : 方差
+        # '''
+        image = np.array(image/255, dtype=float)
+        noise = np.random.normal(mean, var ** 0.5, image.shape)
+        out = image + noise
+        out = np.clip(out, 0, 1.0)
+        out = np.uint8(out*255)
+        return out
 
     def on_epoch_end(self):
         if self.shuffle: np.random.shuffle(self.instances)
