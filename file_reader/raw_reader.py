@@ -11,7 +11,7 @@ def raw_reader(path, i, lung=True):
             lung=False: bone,tissue,muscle windowing
     :return: a 3 channel numpy array
     """
-    file_name = tool_packages.get_filename(path)
+    # file_name = tool_packages.get_filename(path)
     img_set, origin, spacing = tool_packages.raw_image_reader(path)
     masked_img = []
     if i == 0:
@@ -32,4 +32,3 @@ def raw_reader(path, i, lung=True):
     three_channels = np.array(masked_img).transpose((1, 2, 0))
 
     return three_channels
-

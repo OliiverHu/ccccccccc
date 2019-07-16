@@ -71,7 +71,7 @@ def random_sampling(dir_path):
 #     plt.show()
 
 
-def img_windowing(image, max_thres, min_thres, lung=True):
+def img_windowing(image, lung=True):
     # normalize pixels to 0 ~ 1
     if lung is True:
         min_bound = -1500.0
@@ -80,8 +80,9 @@ def img_windowing(image, max_thres, min_thres, lung=True):
         #     max_bound = max_thres
         # if min_thres > min_bound:
         #     min_bound = min_thres
-        image[image > max_bound] = max_bound
-        image[image < min_bound] = min_bound
+        # image[image > max_bound] = max_bound
+        # image[image < min_bound] = min_bound
+        image = np.clip(image, min_bound, max_bound)
         image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
         _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     else:
@@ -91,8 +92,9 @@ def img_windowing(image, max_thres, min_thres, lung=True):
         #     max_bound = max_thres
         # if min_thres > min_bound:
         #     min_bound = min_thres
-        image[image > max_bound] = max_bound
-        image[image < min_bound] = min_bound
+        # image[image > max_bound] = max_bound
+        # image[image < min_bound] = min_bound
+        image = np.clip(image, min_bound, max_bound)
         image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
         _, seg_thres = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return image, seg_thres
@@ -120,8 +122,8 @@ def segmentation_interface(mhd_dir, out_dir, button):
         # a = time.time()
         img_set, _, __ = tool_packages.raw_image_reader(path)
         file_name = tool_packages.get_filename(path)
-        np_array, fname, slicenum = image_segmentor(img_set, file_name, button=button)
-        tool_packages.raw_image_writer(np_array, out_dir + fname + '.mhd')
+        np_array, slicenum = image_segmentor(img_set, button=button)
+        tool_packages.raw_image_writer(np_array, out_dir + file_name + '.mhd')
         # b = time.time()
         # print('elapse: ' + str(b-a))
         # print('slices:' + str(slicenum))
@@ -150,7 +152,7 @@ def image_segmentor(image_array_3d, button):
         # max_pixel_value = image.max()
         # min_pixel_value = image.min()
 
-        image, segment_threshold = img_windowing(image, 0, 0, lung=button)
+        image, segment_threshold = img_windowing(image, lung=button)
 
         # im2, contours, _ = cv2.findContours(segment_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         # cv2.drawContours(image, contours, -1, (0, 0, 255), 3)
