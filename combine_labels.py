@@ -1,8 +1,6 @@
 import numpy as np
 from utils.bbox import BoundBox, bbox_iou
 import os
-from preprocess.tool_packages import get_mhd_directly
-from preprocess.coordinates_translator import pix2mm
 
 
 def cal_conf(data_list):
@@ -10,7 +8,7 @@ def cal_conf(data_list):
 
 
 class Labels3D():
-    def __init__(self, thresh_inf_sup=0.5, thresh_iou=0.5):
+    def __init__(self, thresh_inf_sup=0.0, thresh_iou=0.5):
         self.thresh_inf_sup = thresh_inf_sup
         self.thresh_iou = thresh_iou
 
@@ -64,15 +62,43 @@ class Labels3D():
             labels += self.get_data(one_file)
 
         for label in labels:
+            if label['finish_inf']:
+                continue
+            label['finish_inf'] = True
+            for other in labels:
+                if other['finish_inf']:
+                    continue
+                if label['class'] != other['class']:
+                    continue
+                if label['z'] != other['z']:
+                    continue
+                if not self.compare(label, other, 0.2):
+                    continue
+                if label['conf'] >= other['conf']:
+                    other['finish_inf'] = True
+                    other['finish_sup'] = True
+                else:
+                    label['finish_inf'] = True
+                    label['finish_sup'] = True
+                    break
+            if not label['finish_sup']:
+                label['finish_inf'] = False
+
+        for label in labels:
             label_3D = []
             next_label = label
-            while next_label is not None:
-                label_3D += [next_label]
-                next_label = self.find_next('inf', next_label, labels)
-            while next_label is not None:
-                label_3D += [next_label]
-                next_label = self.find_next('sup', next_label, labels)
-            labels_3D += [label_3D]
+            if not next_label['finish_inf']:
+                while next_label is not None:
+                    label_3D += [next_label]
+                    next_label = self.find_next('inf', next_label, labels)
+
+            next_label = label
+            if not next_label['finish_sup']:
+                while next_label is not None:
+                    label_3D += [next_label]
+                    next_label = self.find_next('sup', next_label, labels)
+            if len(label_3D) > 0:
+                labels_3D += [label_3D]
 
         return labels_3D
 
@@ -87,7 +113,7 @@ class Labels3D():
                     continue
                 if label['z'] != present['z'] - 1:
                     continue
-                if not self.compare(label, present):
+                if not self.compare(label, present, self.thresh_iou):
                     continue
                 if label['sup'] < self.thresh_inf_sup and present['inf'] < self.thresh_inf_sup:
                     continue
@@ -116,7 +142,7 @@ class Labels3D():
                     continue
                 if label['z'] != present['z'] + 1:
                     continue
-                if not self.compare(label, present):
+                if not self.compare(label, present, self.thresh_iou):
                     continue
                 if label['inf'] < self.thresh_inf_sup and present['sup'] < self.thresh_inf_sup:
                     continue
@@ -135,7 +161,7 @@ class Labels3D():
             present['finish_sup'] = True
             return None
 
-    def compare(self, data1, data2):
+    def compare(self, data1, data2, thresh_iou):
         if data2['xmin'] <= data1['xmin'] <= data1['xmax'] <= data2['xmax'] \
            and data2['ymin'] <= data1['ymin'] <= data1['ymax'] <= data2['ymax']:
             return True
@@ -147,7 +173,7 @@ class Labels3D():
 
         iou = bbox_iou(box1, box2)
 
-        if iou > self.thresh_iou:
+        if iou > thresh_iou:
             return True
         else:
             return False
@@ -164,21 +190,11 @@ class Labels3D():
 
         return xmax, xmin, ymax, ymin, zmax, zmin, label_class, conf
 
-    def tran_data(self, data, mhd_name):
-        position = get_mhd_directly(mhd_name)
-        origin = position[:3]
-        spacing = position[3:]
-        point0 = [(data[0]+data[1])/2, (data[2]+data[3])/2, (data[4]+data[5])/2]
-        whl0 = [data[0]-data[1], data[2]-data[3], data[4]-data[5]]
-        point0, whl0 = pix2mm(point0, whl0, origin, spacing)
-        return point0[0], point0[1], point0[2], data[6], data[7]
-
-    def out_put(self, labels_3D, txt_name, mhd_name):
+    def out_put(self, labels_3D, txt_name):
         newline = ''
         for label_3D in labels_3D:
             data = self.build_3D(label_3D)
-            data = self.tran_data(data, mhd_name)
-            newline += ' %.6f %.6f %.6f %d %.6f \n' % data
+            newline += '%d %d %d %d %d %d %d %.6f \n' % data
         with open(txt_name, 'w') as f:
             f.write(newline)
 
@@ -186,7 +202,6 @@ class Labels3D():
 if __name__ == '__main__':
     txt_dir = 'E:/Training/chestCT/test_output/'
     out_dir = 'E:/Training/chestCT/test_output_3D/'
-    mhd_dir = 'E:/Training/chestCT/test_input/'
     txt_paths = []
     for inp_file in os.listdir(txt_dir):
         txt_paths += [txt_dir + inp_file]
@@ -203,5 +218,5 @@ if __name__ == '__main__':
             seen_raw[filename] = [label_path]
 
     for raw in seen_raw:
-        Func = Labels3D(0.5, 0.5)
-        Func.out_put(Func.get_all_data(seen_raw[raw]), out_dir + raw + '.txt', mhd_dir + raw + '.mhd')
+        Func = Labels3D(0.0, 0.5)
+        Func.out_put(Func.get_all_data(seen_raw[raw]), out_dir + raw + '.txt')
