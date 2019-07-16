@@ -76,10 +76,10 @@ def img_windowing(image, max_thres, min_thres, lung=True):
     if lung is True:
         min_bound = -1500.0
         max_bound = 500.0
-        if max_thres < max_bound:
-            max_bound = max_thres
-        if min_thres > min_bound:
-            min_bound = min_thres
+        # if max_thres < max_bound:
+        #     max_bound = max_thres
+        # if min_thres > min_bound:
+        #     min_bound = min_thres
         image[image > max_bound] = max_bound
         image[image < min_bound] = min_bound
         image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
@@ -87,10 +87,10 @@ def img_windowing(image, max_thres, min_thres, lung=True):
     else:
         min_bound = -145.0
         max_bound = 235.0
-        if max_thres < max_bound:
-            max_bound = max_thres
-        if min_thres > min_bound:
-            min_bound = min_thres
+        # if max_thres < max_bound:
+        #     max_bound = max_thres
+        # if min_thres > min_bound:
+        #     min_bound = min_thres
         image[image > max_bound] = max_bound
         image[image < min_bound] = min_bound
         image = np.uint8((image - min_bound) / (max_bound - min_bound) * 255)
@@ -132,7 +132,7 @@ def segmentation_interface(mhd_dir, out_dir, button):
     return None
 
 
-def image_segmentor(image_array_3d, filename, button):
+def image_segmentor(image_array_3d, button):
     """
     Utility: image segmentation for lung CT scan,
     params:
@@ -140,17 +140,17 @@ def image_segmentor(image_array_3d, filename, button):
     returns:
         mask array
     """
-    img_set = image_array_3d
+    img_set = image_array_3d.copy()
     slice_num, width, height = img_set.shape
     rt = []
     # print(slice_num)
     for i in range(slice_num):
         image = np.squeeze(img_set[i])
 
-        max_pixel_value = image.max()
-        min_pixel_value = image.min()
+        # max_pixel_value = image.max()
+        # min_pixel_value = image.min()
 
-        image, segment_threshold = img_windowing(image, max_pixel_value, min_pixel_value, lung=button)
+        image, segment_threshold = img_windowing(image, 0, 0, lung=button)
 
         # im2, contours, _ = cv2.findContours(segment_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         # cv2.drawContours(image, contours, -1, (0, 0, 255), 3)
@@ -189,7 +189,7 @@ def image_segmentor(image_array_3d, filename, button):
             rt.append(img_resize)
         else:
             rt.append(result_)
-    return rt, filename, slice_num
+    return rt, slice_num
 
 
 if __name__ == '__main__':

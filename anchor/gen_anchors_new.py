@@ -126,7 +126,7 @@ if __name__ == '__main__':
     argparser.add_argument(
         '-c',
         '--conf',
-        default='config_neu.json',
+        default='E:/Project/ccccccccc/config_neu.json',
         help='path to configuration file')
     argparser.add_argument(
         '-a',

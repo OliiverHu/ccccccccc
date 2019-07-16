@@ -38,8 +38,8 @@ def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, c
     :return: None
     """
     # csv_file = tool_packages.read_csv(annotation_path)
-    # ab_name = tool_packages.get_filename(file_name)
-    labels = tool_packages.get_label_coords(csv_file_handle, file_name)
+    ab_name = tool_packages.get_filename(file_name)
+    labels = tool_packages.get_label_coords(csv_file_handle, ab_name)
 
     label_db = []
     for label in labels:
@@ -106,5 +106,5 @@ if __name__ == '__main__':
     # img_set, origin, spacing = tool_packages.raw_image_reader('../chestCT_round1/test/318818.mhd')
     # slices, width, height = img_set.shape
     # name = tool_packages.get_filename('chestCT_round1/test/318818.mhd')
-    csv_file = tool_packages.read_csv('../do_not_git/chestCT_round1_annotation.csv')
-    file_parser_interface(['../chestCT_round1/test/318818.mhd'], csv_file, '')
+    csv_file = tool_packages.read_csv('E:/Training/chestCT/chestCT_round1_annotation.csv')
+    file_parser_interface(['E:/Training/chestCT/train_part1/318818.mhd'], csv_file, '')
