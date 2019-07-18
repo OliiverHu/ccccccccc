@@ -27,7 +27,7 @@ def get_path(dir, format):
     return paths
 
 
-def get_label_coords(annotation_csv, name, overlapping_test=False):
+def get_label_world_coords(annotation_csv, name, overlapping_test=False):
     """
     # to get the label info in csv file
     # annotation_csv: a csv file handler(list)
@@ -50,6 +50,18 @@ def get_label_coords(annotation_csv, name, overlapping_test=False):
             else:
                 pass
 
+    return labels
+
+
+def get_label_pixel_coords(name):
+    annotation_path = '../chestCT_round1_annotation_pixel.csv'
+    annotation_csv = read_csv(annotation_path)
+    labels = []
+    for row in annotation_csv:
+        if row[0] == name:
+            labels.append(row)
+        else:
+            pass
     return labels
 
 
@@ -109,7 +121,7 @@ def get_origin_spacing_dict(mhd_path_list):
     for path in mhd_path_list:
         file_name = get_filename(path)
         # name_list.append(file_name)
-        origin_spacing_list = get_mhd_directly(path)
+        origin_spacing_list, _ = get_mhd_directly(path)
         item.append((file_name, origin_spacing_list))
         # print(origin_spacing_list)
 
@@ -173,6 +185,7 @@ def get_mhd_directly(mhd_path):
     file = open(mhd_path, 'r')
     lines = file.readlines()
     # for line in lines[6] + lines[9]:
+    dims = lines[11].split(' = ')[1].split(' ')
     origin_ = lines[6].split(' = ')[1].replace('\n', "")
     spacing_ = lines[9].split(' = ')[1].replace('\n', "")
     origin_ = list(origin_.split(' '))
@@ -181,7 +194,7 @@ def get_mhd_directly(mhd_path):
         origin_[j] = float(origin_[j])
     for j in range(len(spacing_)):
         spacing_[j] = float(spacing_[j])
-    return [origin_[0], origin_[1], origin_[2], spacing_[0], spacing_[1], spacing_[2]]
+    return [origin_[0], origin_[1], origin_[2], spacing_[0], spacing_[1], spacing_[2]], dims
 
 
 # if __name__ == '__main__':

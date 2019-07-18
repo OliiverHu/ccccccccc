@@ -149,9 +149,6 @@ def image_segmentor(image_array_3d, button):
     for i in range(slice_num):
         image = np.squeeze(img_set[i])
 
-        # max_pixel_value = image.max()
-        # min_pixel_value = image.min()
-
         image, segment_threshold = img_windowing(image, lung=button)
 
         # im2, contours, _ = cv2.findContours(segment_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -160,7 +157,7 @@ def image_segmentor(image_array_3d, button):
         # cv2.imshow("img", image)
         # cv2.waitKey(0)
 
-        if button is True:
+        if button is True:  # lung windowing
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
             opening = cv2.morphologyEx(segment_threshold, cv2.MORPH_OPEN, kernel)
             # closing = cv2.morphologyEx(segment_threshold, cv2.MORPH_CLOSE, kernel)
@@ -180,12 +177,12 @@ def image_segmentor(image_array_3d, button):
         plt visualization below
         
         """
-        plt.figure()
-        plt.subplot(1, 2, 1), plt.imshow(image, 'gray'), plt.title('original')
-        plt.subplot(1, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
+        # plt.figure()
+        # plt.subplot(2, 2, 1), plt.imshow(image, 'gray'), plt.title('original')
+        # plt.subplot(2, 2, 2), plt.imshow(result_, 'gray'), plt.title('result')
         # plt.subplot(2, 2, 3), plt.imshow(opening, 'gray'), plt.title('opening')
         # plt.subplot(2, 2, 4), plt.imshow(lca, 'gray'), plt.title('lca')
-        plt.show()
+        # plt.show()
         if img_set.shape[1] != 512:
             img_resize = cv2.resize(result_, (512, 512))
             rt.append(img_resize)
@@ -198,7 +195,7 @@ if __name__ == '__main__':
     samples = '../chestCT_round1/test/320831.mhd'
     img_set, _, __ = tool_packages.raw_image_reader(samples)
     file_name = tool_packages.get_filename(samples)
-    result, fn, s_num = image_segmentor(img_set, file_name, True)  # true->lung. false->muscle, tissue, bone
+    result, s_num = image_segmentor(img_set, True)  # true->lung. false->muscle, tissue, bone
     # plt.figure()
     # plt.subplot(2, 2, 1),
     # plt.imshow(result[10], 'gray'), plt.title('test1')

@@ -39,7 +39,8 @@ def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, c
     """
     # csv_file = tool_packages.read_csv(annotation_path)
     ab_name = tool_packages.get_filename(file_name)
-    labels = tool_packages.get_label_coords(csv_file_handle, ab_name)
+    # labels = tool_packages.get_label_pixel_coords(ab_name)
+    labels = tool_packages.get_label_world_coords(csv_file_handle, ab_name)
 
     label_db = []
     for label in labels:
@@ -96,8 +97,44 @@ def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, c
     return None
 
 
+def annotation_csv_translator(csv_file_path, out_path):
+    lines = tool_packages.read_csv(csv_file_path)
+    tool_packages.write_csv(out_path, ['seriesuid', 'xmin', 'ymin', 'zmin', 'xmax', 'ymax', 'zmax', 'label'])
+    linux_dir_path = ['/home/huyunfei/ct_scan/ct_data/train_part1/', '/home/huyunfei/ct_scan/ct_data/train_part2/',
+                      '/home/huyunfei/ct_scan/ct_data/train_part3/', '/home/huyunfei/ct_scan/ct_data/train_part4/',
+                      '/home/huyunfei/ct_scan/ct_data/train_part5/']
+    win_dir_path = ['E:/tianchi-chestCT/chestCT_round1/train_part1/']
+    mhd_path_list = []
+    mhd_name_item = []
+    mhd_name_list = []
+    for path in win_dir_path:
+        tmp = tool_packages.get_path(path, 'mhd')
+        mhd_path_list += tmp
+    for path in mhd_path_list:
+        mhd_name_item.append((tool_packages.get_filename(path), path))
+        mhd_name_list.append(tool_packages.get_filename(path))
+    mhd_name_dict = dict(mhd_name_item)
+
+    for line in lines:
+        if line[0] not in mhd_name_list:
+            pass
+        else:
+            world_coord = np.asarray([float(line[1]), float(line[2]), float(line[3])])
+            diameter = np.asarray([float(line[4]), float(line[5]), float(line[6])])
+            origin_spacing, dims = tool_packages.get_mhd_directly(mhd_name_dict[line[0]])
+            # dim3 = dims[2].replace('\n', '')
+            resize_coefficient = 1
+            if dims[0] != 512:
+                resize_coefficient = label_normalization_parameter(dims[0])
+            max_coord, _, min_coord = translator.get_8_point(world_coord, diameter, origin_spacing[:3],
+                                                             origin_spacing[3:], resize_coefficient)
+            tool_packages.write_csv(out_path, [line[0], min_coord[0], min_coord[1], min_coord[2],
+                                               max_coord[0], max_coord[1], max_coord[2], line[7]])
+    return None
+
+
 def label_normalization_parameter(w):
-    coefficient = 512 / w
+    coefficient = 512 / int(w)
 
     return coefficient
 
@@ -106,5 +143,6 @@ if __name__ == '__main__':
     # img_set, origin, spacing = tool_packages.raw_image_reader('../chestCT_round1/test/318818.mhd')
     # slices, width, height = img_set.shape
     # name = tool_packages.get_filename('chestCT_round1/test/318818.mhd')
-    csv_file = tool_packages.read_csv('E:/Training/chestCT/chestCT_round1_annotation.csv')
-    file_parser_interface(['E:/Training/chestCT/train_part1/318818.mhd'], csv_file, '')
+    csv_file = tool_packages.read_csv('../do_not_git/chestCT_round1_annotation.csv')
+    file_parser_interface(['../chestCT_round1/test/318818.mhd'], csv_file, '')
+
