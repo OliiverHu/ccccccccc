@@ -1,9 +1,10 @@
 import preprocess.tool_packages as tool_packages
 import preprocess.coordinates_translator as translator
 import numpy as np
+import os
 
 
-def file_parser_interface(mhdfile_path_list, csv_file_handle, out_path):
+def file_parser_interface(mhdfile_path_list, out_path, csv_handle):
     """
     :Function a raw format file parser, to generate npy files and corresponding labels for dl training
     :param mhdfile_path_list: a list of mhd file path
@@ -16,59 +17,65 @@ def file_parser_interface(mhdfile_path_list, csv_file_handle, out_path):
         file_name = tool_packages.get_filename(path)
         img_set, origin, spacing = tool_packages.raw_image_reader(path)
         slice_num, width, height = img_set.shape  # can be optimized HERE
-        param1 = 1
-        if width != 512:
-            param1 = label_normalization_parameter(width)
+        # param1 = 1
+        # if width != 512:
+        #     param1 = label_normalization_parameter(width)
         for i in range(slice_num):
-            label_parser(out_path + file_name, origin, spacing, i, path, csv_file_handle, param1, slice_num-1)
+            label_parser(out_path + file_name, i, path, slice_num-1, csv_handle)
 
         count += 1
         print('file processed: ' + str(count) + '/' + str(length))
 
 
-def label_parser(file_name, origin_pos, spacing_interval, slice_num, def_path, csv_file_handle, resize_coefficient, slice_max):
+def label_parser(file_name, slice_num, def_path, slice_max, csv_handle):
     """
     :param file_name: ouput file path
-    :param origin_pos: origin
-    :param spacing_interval: spacing
+    :param
+    :param
     :param slice_num: which slice of raw file
     :param def_path: mhd file path
-    :param csv_file_handle: annotation file
-    :param resize_coefficient: resize_coefficient
+    :param
+    :param
     :return: None
     """
     # csv_file = tool_packages.read_csv(annotation_path)
     ab_name = tool_packages.get_filename(file_name)
-    # labels = tool_packages.get_label_pixel_coords(ab_name)
-    labels = tool_packages.get_label_world_coords(csv_file_handle, ab_name)
+    labels = tool_packages.get_label_pixel_coords(ab_name, csv_handle)
+    # labels = tool_packages.get_label_world_coords(csv_file_handle, ab_name)
+    if len(labels) == 0:
+        return None
 
     label_db = []
     for label in labels:
-        world_coord = np.asarray([float(label[1]), float(label[2]), float(label[3])])
-        diameter = np.asarray([float(label[4]), float(label[5]), float(label[6])])
-        max_coord, _, min_coord = translator.get_8_point(world_coord, diameter, origin_pos, spacing_interval, resize_coefficient)
-        if max_coord[2] == min_coord[2]:  # if this label only has one layer
+        if label[6] == label[3]:  # if this label only has one layer
             # print(min_coord[2])
-            if min_coord[2] == slice_num:
-                label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 0, 0])
+            if int(label[3]) == slice_num:
+                if slice_num == 0:
+                    label_db.append([label[1], label[2], label[4], label[5], label[7], 0, 1])
+                    continue
+                elif slice_num == slice_max:
+                    label_db.append([label[1], label[2], label[4], label[5], label[7], 1, 0])
+                else:
+                    label_db.append([label[1], label[2], label[4], label[5], label[7], 0, 0])
                 # print('received')
             else:
                 pass
         else:  # if this label has multiple layers
-            for i in range(min_coord[2], max_coord[2] + 1, 1):
+            for i in range(int(label[3]), int(label[6]) + 1, 1):
                 if i == slice_num == 0:
-                    label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 1, 1])
+                    label_db.append([label[1], label[2], label[4], label[5], label[7], 1, 1])
+                    continue
                 elif i == slice_num == slice_max:
-                    label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 1, 1])
+                    label_db.append([label[1], label[2], label[4], label[5], label[7], 1, 1])
                 else:
                     if i == slice_num:
                         # print('received')
-                        if i == min_coord[2]:
-                            label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 1, 0])
-                        elif i == max_coord[2]:
-                            label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 0, 1])
+                        if i == int(label[3]):
+                            label_db.append([label[1], label[2], label[4], label[5], label[7], 1, 0])
+                        elif i == int(label[6]):
+                            label_db.append([label[1], label[2], label[4], label[5], label[7], 0, 1])
                         else:
-                            label_db.append([min_coord[0], min_coord[1], max_coord[0], max_coord[1], label[7], 1, 1])
+                            label_db.append([label[1], label[2], label[4], label[5], label[7], 1, 1])
                     else:
                         pass
 
@@ -140,9 +147,20 @@ def label_normalization_parameter(w):
 
 
 if __name__ == '__main__':
-    # img_set, origin, spacing = tool_packages.raw_image_reader('../chestCT_round1/test/318818.mhd')
-    # slices, width, height = img_set.shape
-    # name = tool_packages.get_filename('chestCT_round1/test/318818.mhd')
-    csv_file = tool_packages.read_csv('../do_not_git/chestCT_round1_annotation.csv')
-    file_parser_interface(['../chestCT_round1/test/318818.mhd'], csv_file, '')
+    pass
+    img_set, origin, spacing = tool_packages.raw_image_reader('../chestCT_round1/test/318818.mhd')
+    slices, width, height = img_set.shape
+    name = tool_packages.get_filename('chestCT_round1/test/318818.mhd')
+    # csv_file = tool_packages.read_csv('../do_not_git/chestCT_round1_annotation.csv')
+    annotation_path_world = '../do_not_git/chestCT_round1_annotation.csv'
 
+    annotation_path_pixel = '../chestCT_round1/test.csv'
+    if os.path.exists(annotation_path_pixel):
+        print('the  pixel coordinates file exists')
+        csv_file_handle = tool_packages.read_csv(annotation_path_pixel)
+    else:
+        print('generating pixel coordinates file')
+        annotation_csv_translator(annotation_path_world, annotation_path_pixel)
+        print('done')
+        csv_file_handle = tool_packages.read_csv(annotation_path_pixel)
+    file_parser_interface(['../chestCT_round1/test/318818.mhd'], '', csv_file_handle)

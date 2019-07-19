@@ -53,11 +53,11 @@ def get_label_world_coords(annotation_csv, name, overlapping_test=False):
     return labels
 
 
-def get_label_pixel_coords(name):
-    annotation_path = '../chestCT_round1_annotation_pixel.csv'
-    annotation_csv = read_csv(annotation_path)
+def get_label_pixel_coords(name, csv_handle):
+    # annotation_path = '//chestCT_round1_annotation_pixel.csv'
+    # annotation_csv = read_csv(annotation_path)
     labels = []
-    for row in annotation_csv:
+    for row in csv_handle:
         if row[0] == name:
             labels.append(row)
         else:

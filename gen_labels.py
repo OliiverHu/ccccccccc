@@ -1,4 +1,4 @@
-from preprocess.label_parser import file_parser_interface
+from preprocess.label_parser import file_parser_interface, annotation_csv_translator
 from preprocess.tool_packages import get_path, read_csv
 import os
 
@@ -11,9 +11,8 @@ if __name__ == '__main__':
 
     annotation_path_world = 'do_not_git/chestCT_round1_annotation.csv'
 
-    # TODO
-    annotation_path_pixel = ''
-    csv_file_handle = read_csv(annotation_path_world)
+    annotation_path_pixel = 'chestCT_round1/test.csv'
+    # csv_file_handle = read_csv(annotation_path_world)
     # out_dir = '/home/huyunfei/ct_scan/processed_data/'
     out_dir = 'chestCT_round1/'
 
@@ -22,6 +21,11 @@ if __name__ == '__main__':
         tmp = get_path(path, 'mhd')
         mhd_path_list += tmp
 
-    # TODO
-    # if os.path.exists()
-    file_parser_interface(mhd_path_list, csv_file_handle, out_dir)
+    if os.path.exists(annotation_path_pixel):
+        print('the  pixel coordinates file exists')
+        csv_file_handle = read_csv(annotation_path_pixel)
+    else:
+        print('generating pixel coordinates file')
+        annotation_csv_translator(annotation_path_world, annotation_path_pixel)
+        csv_file_handle = read_csv(annotation_path_pixel)
+    file_parser_interface(mhd_path_list, out_dir, csv_file_handle)
